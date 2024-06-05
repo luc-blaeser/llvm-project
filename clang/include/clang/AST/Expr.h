@@ -2991,6 +2991,9 @@ public:
 
   bool hasStoredFPFeatures() const { return CallExprBits.HasFPFeatures; }
 
+  bool isCoroMustElide() const { return CallExprBits.IsCoroMustElide; }
+  void setCoroMustElide(bool V = true) { CallExprBits.IsCoroMustElide = V; }
+
   Decl *getCalleeDecl() { return getCallee()->getReferencedDeclOfCallee(); }
   const Decl *getCalleeDecl() const {
     return getCallee()->getReferencedDeclOfCallee();
