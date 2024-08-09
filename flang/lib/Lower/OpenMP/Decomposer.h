@@ -49,11 +49,14 @@ ConstructQueue buildConstructQueue(mlir::ModuleOp modOp,
 bool isLastItemInQueue(ConstructQueue::const_iterator item,
                        const ConstructQueue &queue);
 
-/// Try to match a sequence of \c directives to the range of leaf constructs
-/// starting from \c item to the end of the \c queue.
+/// Try to match the leaf constructs conforming the given \c directive to the
+/// range of leaf constructs starting from \c item to the end of the \c queue.
+/// If \c directive doesn't represent a compound directive, check that \c item
+/// matches that directive and is the only element before the end of the
+/// \c queue.
 bool matchLeafSequence(ConstructQueue::const_iterator item,
                        const ConstructQueue &queue,
-                       llvm::ArrayRef<llvm::omp::Directive> directives);
+                       llvm::omp::Directive directive);
 } // namespace Fortran::lower::omp
 
 #endif // FORTRAN_LOWER_OPENMP_DECOMPOSER_H

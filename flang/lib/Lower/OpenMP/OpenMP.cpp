@@ -2172,28 +2172,22 @@ static bool genOMPCompositeDispatch(
     mlir::Location loc, const ConstructQueue &queue,
     ConstructQueue::const_iterator item, DataSharingProcessor &dsp) {
   using llvm::omp::Directive;
-  using llvm::omp::getLeafConstructs, lower::omp::matchLeafSequence;
+  using lower::omp::matchLeafSequence;
 
-  if (matchLeafSequence(
-          item, queue,
-          getLeafConstructs(Directive::OMPD_distribute_parallel_do)))
+  if (matchLeafSequence(item, queue, Directive::OMPD_distribute_parallel_do))
     genCompositeDistributeParallelDo(converter, symTable, semaCtx, eval, loc,
                                      queue, item, dsp);
-  else if (matchLeafSequence(
-               item, queue,
-               getLeafConstructs(Directive::OMPD_distribute_parallel_do_simd)))
+  else if (matchLeafSequence(item, queue,
+                             Directive::OMPD_distribute_parallel_do_simd))
     genCompositeDistributeParallelDoSimd(converter, symTable, semaCtx, eval,
                                          loc, queue, item, dsp);
-  else if (matchLeafSequence(
-               item, queue, getLeafConstructs(Directive::OMPD_distribute_simd)))
+  else if (matchLeafSequence(item, queue, Directive::OMPD_distribute_simd))
     genCompositeDistributeSimd(converter, symTable, semaCtx, eval, loc, queue,
                                item, dsp);
-  else if (matchLeafSequence(item, queue,
-                             getLeafConstructs(Directive::OMPD_do_simd)))
+  else if (matchLeafSequence(item, queue, Directive::OMPD_do_simd))
     genCompositeDoSimd(converter, symTable, semaCtx, eval, loc, queue, item,
                        dsp);
-  else if (matchLeafSequence(item, queue,
-                             getLeafConstructs(Directive::OMPD_taskloop_simd)))
+  else if (matchLeafSequence(item, queue, Directive::OMPD_taskloop_simd))
     genCompositeTaskloopSimd(converter, symTable, semaCtx, eval, loc, queue,
                              item, dsp);
   else
@@ -2322,18 +2316,11 @@ static void genOMPDispatch(lower::AbstractConverter &converter,
     // that use this construct, add a single construct for now.
     genSingleOp(converter, symTable, semaCtx, eval, loc, queue, item);
     break;
-
-  // Composite constructs
-  case llvm::omp::Directive::OMPD_distribute_parallel_do:
-  case llvm::omp::Directive::OMPD_distribute_parallel_do_simd:
-  case llvm::omp::Directive::OMPD_distribute_simd:
-  case llvm::omp::Directive::OMPD_do_simd:
-  case llvm::omp::Directive::OMPD_taskloop_simd:
-    // Composite constructs should have been split into a sequence of leaf
-    // constructs and lowered by genOMPCompositeDispatch().
-    llvm_unreachable("Unexpected composite construct.");
-    break;
   default:
+    // Combined and composite constructs should have been split into a sequence
+    // of leaf constructs when building the construct queue.
+    assert(!llvm::omp::isLeafConstruct(dir) &&
+           "Unexpected compound construct.");
     break;
   }
 

@@ -100,15 +100,19 @@ ConstructQueue buildConstructQueue(
 
 bool matchLeafSequence(ConstructQueue::const_iterator item,
                        const ConstructQueue &queue,
-                       llvm::ArrayRef<llvm::omp::Directive> directives) {
+                       llvm::omp::Directive directive) {
+  llvm::ArrayRef<llvm::omp::Directive> leafDirs =
+      llvm::omp::getLeafConstructsOrSelf(directive);
+
   for (auto [dir, leaf] :
-       llvm::zip_longest(directives, llvm::make_range(item, queue.end()))) {
-    if (!dir || !leaf)
+       llvm::zip_longest(leafDirs, llvm::make_range(item, queue.end()))) {
+    if (!dir.has_value() || !leaf.has_value())
       return false;
 
-    if (dir.value() != leaf.value().id)
+    if (*dir != leaf->id)
       return false;
   }
+
   return true;
 }
 
