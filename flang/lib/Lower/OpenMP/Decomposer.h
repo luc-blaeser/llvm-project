@@ -10,7 +10,6 @@
 
 #include "Clauses.h"
 #include "mlir/IR/BuiltinOps.h"
-#include "llvm/Frontend/OpenMP/ConstructCompositionT.h"
 #include "llvm/Frontend/OpenMP/ConstructDecompositionT.h"
 #include "llvm/Frontend/OpenMP/OMP.h"
 #include "llvm/Support/Compiler.h"
@@ -49,6 +48,12 @@ ConstructQueue buildConstructQueue(mlir::ModuleOp modOp,
 
 bool isLastItemInQueue(ConstructQueue::const_iterator item,
                        const ConstructQueue &queue);
+
+/// Try to match a sequence of \c directives to the range of leaf constructs
+/// starting from \c item to the end of the \c queue.
+bool matchLeafSequence(ConstructQueue::const_iterator item,
+                       const ConstructQueue &queue,
+                       llvm::ArrayRef<llvm::omp::Directive> directives);
 } // namespace Fortran::lower::omp
 
 #endif // FORTRAN_LOWER_OPENMP_DECOMPOSER_H
